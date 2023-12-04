@@ -13,114 +13,106 @@ class Creature
   /*****************************************************
    * Compléter le code à partir d'ici
    *****************************************************/
+protected:
+    //atributes
+    string nom_;
+    int niveau_;
+    int points_de_vie_;
+    int force_;
+    int position_;
 
-     protected:
-	const string nom;
-	int niveau, points_de_vie_, force_, position_;
 public:
-	Creature(const string n, int ni, int p, int f, int po = 0) : nom(n), niveau(ni), points_de_vie_(p), force_(f), position_(po) {}
+    //constructor
+    Creature(string nom, int niveau, int pdv, int force, int pos=0)
+    :nom_(nom), niveau_(niveau), points_de_vie_(pdv), force_(force), position_(pos) {}
 
-	bool vivant() const
-	{
-		if (points_de_vie_ > 0) return true;
-		else return false;
-	}
-	int points_attaque() const
-	{
-		if (vivant() == true) return niveau * force_;
-		else return 0;
-	}
-	void deplacer(int x)
-	{
-		position_ += x;
-	}
-	void adieux() const
-	{
-		cout << nom << " n'est plus !" << endl;
-	}
-	int position() const
-	{
-		return position_;
-	}
-	void faiblir(int x)
-	{
-		if (vivant() == true)
-		{
-			points_de_vie_ -= x;
-			if (points_de_vie_ < 0)
-			{
-				points_de_vie_ = 0;
-			}
-		}
-		if (vivant() == false)
-		{
-			points_de_vie_ = 0;
-			adieux();
-		}
-	}
-	void afficher() const
-	{
-		cout << nom << ", niveau: " << niveau << ", points de vie: " << points_de_vie_ << ", force: " << force_ << ", points d'attaque: " << points_attaque() << ", position: " << position_ << endl;
-	}
+    //methods
+    bool vivant() const {return points_de_vie_>0;}
+
+    int points_attaque() const 
+    {
+        int pa;
+        if (vivant()) {pa = niveau_*force_;}
+        else {pa = 0;}
+        return pa;
+    }
+
+    void deplacer (int d){ if ( vivant() ) position_+=d;}
+
+    void adieux() const {cout << nom_ << " n'est plus!" << endl;}
+
+    void faiblir (int f) 
+    {
+        points_de_vie_-=f;
+        if ( !vivant() ) 
+        {
+            points_de_vie_=0;
+            adieux();
+        }
+    }
+
+    void afficher() const
+    {
+        cout << nom_ << ", niveau: "<< niveau_<< ", points de vie: " << points_de_vie_ << ", force: " << force_ << ", points d'attaque: "<< points_attaque() << ", position: " <<position_ << endl;
+    }
+
+    int position() const {return position_;}
 };
-class Dragon : public Creature
+
+
+class Dragon: public Creature
 {
-private:
-	int portee_flamme_;
+protected:
+    int portee_flamme_;
+
 public:
-	Dragon(const string n, int ni, int p, int f, int pf, int po = 0) : portee_flamme_(pf), Creature(n, ni, p, f, po) {}
-	void voler(int pos)
-	{
-		deplacer(pos);
-	}
-	void souffle_sur(Creature& bete)
-	{
-		int d = distance(bete.position(), this->position());
-		if (bete.vivant() == true && this->vivant() == true)
-		{
-			if (this->portee_flamme_ >= d)
-			{
-				bete.faiblir(this->points_attaque());
-				this->faiblir(d);
-			}
-			if (bete.vivant() == false && this->vivant() == true)
-			{
-				this->niveau++;
-			}
-		}
-	}
+    Dragon(string nom, int niveau, int pdv, int force, int flamme, int pos=0)
+    :Creature(nom, niveau, pdv, force, pos), portee_flamme_(flamme){}
+
+    void voler(int pos) {if ( vivant() )position_=pos;}
+
+    void souffle_sur(Creature& bete)
+    {
+        bool inrange;
+        inrange = distance(position_, bete.position()) <= portee_flamme_;
+        if (vivant() && bete.vivant() && inrange)
+        {
+            bete.faiblir(points_attaque());
+            faiblir(distance(position_, bete.position()));
+            if (vivant() && !bete.vivant()) { niveau_ +=1;}
+        }
+    }
 };
-class Hydre : public Creature
+
+class Hydre: public Creature
 {
-private:
-	int longueur_cou_, dose_poison_;
+protected:
+    int longueur_cou_;
+    int dose_poison_;
+
 public:
-	Hydre(const string n, int ni, int p, int f, int lc, int dp, int po = 0) : longueur_cou_(lc), dose_poison_(dp), Creature(n, ni, p, f, po) {}
-	void empoisonne(Creature& bete)
-	{
-		int d = distance(bete.position(), this->position());
-		if (bete.vivant() == true && this->vivant() == true)
-		{
-			if (this->longueur_cou_ >= d)
-			{
-				bete.faiblir(this->points_attaque() + this->dose_poison_);
-			}
-			if (bete.vivant() == false && this->vivant() == true)
-			{
-				this->niveau++;
-			}
-		}
-	}
+    Hydre(string nom, int niveau, int pdv, int force, int cou, int  dose, int pos=0)
+    :Creature(nom, niveau, pdv, force, pos), longueur_cou_(cou), dose_poison_(dose){}
+
+    void empoisonne(Creature& bete) 
+    {
+        bool inrange;
+        inrange = distance(position_, bete.position()) <= longueur_cou_;
+        if (vivant() && bete.vivant() && inrange)
+        {
+            bete.faiblir(points_attaque()+dose_poison_);
+            if (vivant() && !bete.vivant()) { niveau_ +=1;}
+        }
+    }
 
 };
-void combat(Dragon& d, Hydre& h)
+
+void combat (Dragon & dragon, Hydre & hydre) 
 {
-	h.empoisonne(d);
-	d.souffle_sur(h);
-}    
-
-
-
+    hydre.empoisonne(dragon);
+    dragon.souffle_sur(hydre);
+    return;
+};
 /*******************************************
  * Ne rien modifier après cette ligne.
  *******************************************/

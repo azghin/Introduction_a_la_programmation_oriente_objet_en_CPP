@@ -75,11 +75,11 @@ public:
     {
         bool inrange;
         inrange = distance(position_, bete.position()) <= portee_flamme_;
-        if (vivant() && bete.vivant() && inrange)
+        if (vivant() and bete.vivant() and inrange)
         {
             bete.faiblir(points_attaque());
             faiblir(distance(position_, bete.position()));
-            if (vivant() && !bete.vivant()) { niveau_ +=1;}
+            if (vivant() and !bete.vivant()) { niveau_ +=1;}
         }
     }
 };
@@ -98,10 +98,10 @@ public:
     {
         bool inrange;
         inrange = distance(position_, bete.position()) <= longueur_cou_;
-        if (vivant() && bete.vivant() && inrange)
+        if (vivant() and bete.vivant() and inrange)
         {
             bete.faiblir(points_attaque()+dose_poison_);
-            if (vivant() && !bete.vivant()) { niveau_ +=1;}
+            if (vivant() and !bete.vivant()) { niveau_ +=1;}
         }
     }
 
